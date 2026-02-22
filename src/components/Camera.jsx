@@ -8,17 +8,39 @@ const Camera = ({ onCapture }) => {
   const [isCameraActive, setIsCameraActive] = useState(false);
 
   const startCamera = async () => {
-    try {
-      const mediaStream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: 'environment', width: { ideal: 1080 }, height: { ideal: 1080 } },
-        audio: false 
-      });
-      videoRef.current.srcObject = mediaStream;
-      setStream(mediaStream);
-      setIsCameraActive(true);
-    } catch (err) {
-      console.error("Error accessing camera:", err);
-      alert("カメラへのアクセスに失敗しました。");
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      alert("お使いのブラウザはカメラ機能をサポートしていないか、セキュアな接続（HTTPS）ではありません。");
+      return;
+    }
+
+    const constraintsList = [
+      { video: { facingMode: 'environment', width: { ideal: 1080 }, height: { ideal: 1080 } }, audio: false },
+      { video: { facingMode: 'user' }, audio: false },
+      { video: true, audio: false }
+    ];
+
+    let lastError = null;
+    for (const constraints of constraintsList) {
+      try {
+        const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+        videoRef.current.srcObject = mediaStream;
+        setStream(mediaStream);
+        setIsCameraActive(true);
+        return; // Success!
+      } catch (err) {
+        console.warn(`Failed with constraints:`, constraints, err);
+        lastError = err;
+      }
+    }
+
+    // If all failed
+    console.error("All camera constraints failed:", lastError);
+    if (lastError.name === 'NotAllowedError') {
+      alert("カメラの使用が許可されていません。ブラウザの設定で許可してください。");
+    } else if (lastError.name === 'NotFoundError') {
+      alert("カメラが見つかりませんでした。デバイスにカメラが搭載されているか確認してください。");
+    } else {
+      alert("カメラの起動に失敗しました。他のアプリでカメラを使用していないか確認してください。");
     }
   };
 
@@ -39,12 +61,12 @@ const Camera = ({ onCapture }) => {
     const size = Math.min(video.videoWidth, video.videoHeight);
     canvas.width = size;
     canvas.height = size;
-    
+
     const startX = (video.videoWidth - size) / 2;
     const startY = (video.videoHeight - size) / 2;
 
     context.drawImage(video, startX, startY, size, size, 0, 0, size, size);
-    
+
     const imageData = canvas.toDataURL('image/jpeg');
     onCapture(imageData);
     stopCamera();
@@ -59,10 +81,10 @@ const Camera = ({ onCapture }) => {
         </div>
       ) : (
         <div className="video-container">
-          <video 
-            ref={videoRef} 
-            autoPlay 
-            playsInline 
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
             className="video-preview"
           />
           <div className="camera-overlay">
