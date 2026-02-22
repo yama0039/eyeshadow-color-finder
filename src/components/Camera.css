@@ -12,6 +12,14 @@
     animation: fadeInUp 0.8s ease-out;
 }
 
+.camera-placeholder-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+    width: 100%;
+}
+
 .camera-placeholder {
     display: flex;
     flex-direction: column;
@@ -19,11 +27,42 @@
     gap: 12px;
     cursor: pointer;
     transition: var(--transition);
-    color: var(--text-muted);
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.05);
+    padding: 30px;
+    border-radius: 50%;
+    width: 180px;
+    height: 180px;
+    justify-content: center;
+    border: 1px solid rgba(197, 160, 89, 0.3);
 }
 
 .camera-placeholder:hover {
+    background: rgba(197, 160, 89, 0.1);
+    transform: scale(1.05);
     color: var(--primary-gold);
+}
+
+.upload-fallback {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    padding: 10px 20px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    transition: var(--transition);
+}
+
+.upload-fallback:hover {
+    color: var(--primary-gold);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.upload-fallback .icon-small {
+    font-size: 1.2rem;
 }
 
 .camera-placeholder .icon {
