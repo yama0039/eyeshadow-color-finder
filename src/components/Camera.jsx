@@ -47,6 +47,13 @@ const Camera = ({ onCapture }) => {
     }
   };
 
+  // ストリームが準備でき、videoRefがマウントされたら接続する
+  useEffect(() => {
+    if (isCameraActive && stream && videoRef.current) {
+      videoRef.current.srcObject = stream;
+    }
+  }, [isCameraActive, stream]);
+
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -114,11 +121,11 @@ const Camera = ({ onCapture }) => {
           <div className="camera-overlay">
             <div className="target-frame"></div>
           </div>
+          <button className="btn-cancel" onClick={stopCamera}>✕</button>
           <div className="camera-controls">
             <button className="btn-capture" onClick={capturePhoto}>
               <div className="shutter-inner"></div>
             </button>
-            <button className="btn-cancel" onClick={stopCamera}>✕</button>
           </div>
         </div>
       )}
