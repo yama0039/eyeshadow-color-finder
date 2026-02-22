@@ -24,10 +24,10 @@ const Camera = ({ onCapture }) => {
     for (const constraints of constraintsList) {
       try {
         const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-        videoRef.current.srcObject = mediaStream;
+        // 先に状態を更新して、次のレンダリングでvideo要素が現れるようにする
         setStream(mediaStream);
         setIsCameraActive(true);
-        return; // Success!
+        return;
       } catch (err) {
         console.warn(`Failed with constraints:`, constraints, err);
         lastError = err;
