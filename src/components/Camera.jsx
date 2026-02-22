@@ -4,6 +4,7 @@ import './Camera.css';
 const Camera = ({ onCapture }) => {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
+  const fileInputRef = useRef(null);
   const [stream, setStream] = useState(null);
   const [isCameraActive, setIsCameraActive] = useState(false);
 
@@ -35,13 +36,30 @@ const Camera = ({ onCapture }) => {
 
     // If all failed
     console.error("All camera constraints failed:", lastError);
-    if (lastError.name === 'NotAllowedError') {
+    const errorMsg = lastError ? ` (${lastError.name})` : "";
+
+    if (lastError?.name === 'NotAllowedError') {
       alert("カメラの使用が許可されていません。ブラウザの設定で許可してください。");
-    } else if (lastError.name === 'NotFoundError') {
+    } else if (lastError?.name === 'NotFoundError') {
       alert("カメラが見つかりませんでした。デバイスにカメラが搭載されているか確認してください。");
     } else {
-      alert("カメラの起動に失敗しました。他のアプリでカメラを使用していないか確認してください。");
+      alert(`カメラの起動に失敗しました${errorMsg}。他のアプリでカメラを使用していないか確認するか、画像をアップロードしてください。`);
     }
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        onCapture(event.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const triggerFileUpload = () => {
+    fileInputRef.current.click();
   };
 
   const stopCamera = () => {
@@ -75,9 +93,15 @@ const Camera = ({ onCapture }) => {
   return (
     <div className="camera-component">
       {!isCameraActive ? (
-        <div className="camera-placeholder" onClick={startCamera}>
-          <div className="icon">📷</div>
-          <p>タップしてカメラを起動</p>
+        <div className="camera-placeholder-container">
+          <div className="camera-placeholder" onClick={startCamera}>
+            <div className="icon">📷</div>
+            <p>カメラを起動</p>
+          </div>
+          <div className="upload-fallback" onClick={triggerFileUpload}>
+            <div className="icon-small">📁</div>
+            <p>ライブラリから写真を選択</p>
+          </div>
         </div>
       ) : (
         <div className="video-container">
@@ -99,6 +123,13 @@ const Camera = ({ onCapture }) => {
         </div>
       )}
       <canvas ref={canvasRef} style={{ display: 'none' }} />
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        accept="image/*"
+        style={{ display: 'none' }}
+      />
     </div>
   );
 };
